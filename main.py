@@ -1,10 +1,24 @@
 from fastapi import FastAPI, Query
 from googletrans import Translator, LANGUAGES
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Language Translation API")
 translator = Translator()
 
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+@app.get("/")
+async def main():
+    return {"message": "Hello World"}
 
 class TranslationSchema(BaseModel):
     text: str
@@ -13,7 +27,7 @@ class TranslationSchema(BaseModel):
 
 
 @app.get("/translate")
-def translate_text(
+async def translate_text(
     text: str = Query(..., min_length=1),
     source_lang: str | None = None,
     target_lang: str = Query(..., min_length=2, max_length=2)
@@ -63,7 +77,7 @@ async def translate_text(data: TranslationSchema):
 
 
 @app.get("/languages")
-def get_language_codes():
+async def get_language_codes():
     """
     Get a list of all available language codes and their corresponding language names.
     """
